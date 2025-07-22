@@ -1,6 +1,6 @@
 import localforage from 'localforage';
 import { v4 as uuidv4 } from 'uuid';
-import type { User, CSC, Technician, FormData } from '../types';
+import type { User, CSC, Technician, FormData, ServiceRequestFormData } from '../types';
 
 // Configure LocalForage stores
 const usersStore = localforage.createInstance({
@@ -21,6 +21,11 @@ const techniciansStore = localforage.createInstance({
 const formsStore = localforage.createInstance({
   name: 'AppDB',
   storeName: 'forms'
+});
+
+const serviceRequestsStore = localforage.createInstance({
+  name: 'AppDB',
+  storeName: 'serviceRequests'
 });
 
 class DatabaseService {
@@ -141,6 +146,58 @@ class DatabaseService {
   async deleteForm(id: string): Promise<boolean> {
     try {
       await formsStore.removeItem(id);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // Service Request operations
+  async createServiceRequest(serviceRequestData: Omit<ServiceRequestFormData, 'id' | 'submissionTime'>): Promise<ServiceRequestFormData> {
+    const serviceRequest: ServiceRequestFormData = {
+      ...serviceRequestData,
+      id: uuidv4(),
+      submissionTime: new Date(),
+      serviceRequestNo: serviceRequestData.serviceRequestNo || `SR-${Date.now()}`
+    };
+    await serviceRequestsStore.setItem(serviceRequest.id, serviceRequest);
+    return serviceRequest;
+  }
+
+  async getServiceRequestById(id: string): Promise<ServiceRequestFormData | null> {
+    return await serviceRequestsStore.getItem(id);
+  }
+
+  async getServiceRequestsByUserId(userId: string): Promise<ServiceRequestFormData[]> {
+    const serviceRequests: ServiceRequestFormData[] = [];
+    await serviceRequestsStore.iterate((value: ServiceRequestFormData) => {
+      if (value.userId === userId) {
+        serviceRequests.push(value);
+      }
+    });
+    return serviceRequests.sort((a, b) => new Date(b.submissionTime).getTime() - new Date(a.submissionTime).getTime());
+  }
+
+  async getAllServiceRequests(): Promise<ServiceRequestFormData[]> {
+    const serviceRequests: ServiceRequestFormData[] = [];
+    await serviceRequestsStore.iterate((value: ServiceRequestFormData) => {
+      serviceRequests.push(value);
+    });
+    return serviceRequests.sort((a, b) => new Date(b.submissionTime).getTime() - new Date(a.submissionTime).getTime());
+  }
+
+  async updateServiceRequest(id: string, updates: Partial<ServiceRequestFormData>): Promise<ServiceRequestFormData | null> {
+    const existingServiceRequest = await this.getServiceRequestById(id);
+    if (!existingServiceRequest) return null;
+
+    const updatedServiceRequest = { ...existingServiceRequest, ...updates };
+    await serviceRequestsStore.setItem(id, updatedServiceRequest);
+    return updatedServiceRequest;
+  }
+
+  async deleteServiceRequest(id: string): Promise<boolean> {
+    try {
+      await serviceRequestsStore.removeItem(id);
       return true;
     } catch {
       return false;

@@ -5,7 +5,9 @@ import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { UserDashboard } from './pages/UserDashboard';
 import { CreateFormPage } from './pages/CreateFormPage';
+import { ServiceRequestForm } from './pages/ServiceRequestForm';
 import { CSCDashboard } from './pages/CSCDashboard';
+import { CSCServiceRequestView } from './pages/CSCServiceRequestView';
 import { EditFormPage } from './pages/EditFormPage';
 import { TechnicianDashboard } from './pages/TechnicianDashboard';
 import './App.css';
@@ -24,9 +26,11 @@ function App() {
             {/* User Routes */}
             <Route path="/user-dashboard" element={<UserDashboard />} />
             <Route path="/create-form" element={<CreateFormPage />} />
+            <Route path="/service-request" element={<ServiceRequestForm />} />
             
             {/* CSC Routes */}
             <Route path="/csc-dashboard" element={<CSCDashboard />} />
+            <Route path="/csc-service-request/:requestId" element={<CSCServiceRequestView />} />
             <Route path="/edit-form/:formId" element={<EditFormPage />} />
             
             {/* Technician Routes */}
