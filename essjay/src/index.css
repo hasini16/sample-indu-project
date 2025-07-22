@@ -1,5 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -28,6 +32,13 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
 }
 
 h1 {
@@ -65,4 +76,41 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Reset for our app */
+body {
+  margin: 0;
+  padding: 0;
+  display: block;
+  place-items: unset;
+  min-width: unset;
+  min-height: unset;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+#root {
+  max-width: unset;
+  margin: 0;
+  padding: 0;
+  text-align: unset;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
