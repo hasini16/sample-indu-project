@@ -2,49 +2,73 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Navbar } from '../components/Navbar';
-import type { FormData } from '../types';
+import type { FormData, ServiceRequestFormData } from '../types';
 import { db } from '../services/database';
-import { Eye, Edit, CheckCircle, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Eye, Edit, CheckCircle, Calendar, AlertCircle, CheckCircle2, FileText, Settings } from 'lucide-react';
 
 export function CSCDashboard() {
   const { user, userType } = useAuth();
   const navigate = useNavigate();
   const [pendingForms, setPendingForms] = useState<FormData[]>([]);
   const [completedForms, setCompletedForms] = useState<FormData[]>([]);
+  const [pendingServiceRequests, setPendingServiceRequests] = useState<ServiceRequestFormData[]>([]);
+  const [completedServiceRequests, setCompletedServiceRequests] = useState<ServiceRequestFormData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedForm, setSelectedForm] = useState<FormData | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'forms' | 'service-requests'>('service-requests');
 
   useEffect(() => {
     if (userType !== 'csc' || !user) {
       navigate('/');
       return;
     }
-    loadForms();
-  }, [user, userType, navigate]);
+          loadForms();
+      loadServiceRequests();
+    }, [user, userType, navigate]);
+  
+    const loadForms = async () => {
+      try {
+        const allForms = await db.getAllForms();
+        
+        const pending = allForms.filter(form => 
+          form.status === 'submitted' || 
+          form.status === 're-submitted' || 
+          form.status === 'under process' || 
+          form.status === 'action needed'
+        );
+        
+        const completed = allForms.filter(form => form.status === 'completed');
+        
+        setPendingForms(pending);
+        setCompletedForms(completed);
+      } catch (error) {
+        console.error('Error loading forms:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const loadForms = async () => {
-    try {
-      const allForms = await db.getAllForms();
-      
-      const pending = allForms.filter(form => 
-        form.status === 'submitted' || 
-        form.status === 're-submitted' || 
-        form.status === 'under process' || 
-        form.status === 'action needed'
-      );
-      
-      const completed = allForms.filter(form => form.status === 'completed');
-      
-      setPendingForms(pending);
-      setCompletedForms(completed);
-    } catch (error) {
-      console.error('Error loading forms:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    const loadServiceRequests = async () => {
+      try {
+        const allServiceRequests = await db.getAllServiceRequests();
+        
+        const pending = allServiceRequests.filter(request => 
+          request.status === 'submitted' || 
+          request.status === 're-submitted' || 
+          request.status === 'under process' || 
+          request.status === 'action needed'
+        );
+        
+        const completed = allServiceRequests.filter(request => request.status === 'completed');
+        
+        setPendingServiceRequests(pending);
+        setCompletedServiceRequests(completed);
+      } catch (error) {
+        console.error('Error loading service requests:', error);
+      }
+    };
 
   const handleViewForm = (form: FormData) => {
     setSelectedForm(form);
@@ -251,16 +275,194 @@ export function CSCDashboard() {
           </p>
         </div>
 
-        {/* Pending Forms Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center">
-              <AlertCircle className="mr-2" size={24} style={{ color: 'var(--color-orange-500)' }} />
-              <h2 className="text-xl font-semibold text-gray-900">
-                Pending Forms ({pendingForms.length})
-              </h2>
-            </div>
+        {/* Tabs */}
+        <div className="mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              <button
+                onClick={() => setActiveTab('service-requests')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'service-requests'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center">
+                  <Settings className="mr-2" size={20} />
+                  Service Requests ({pendingServiceRequests.length} pending)
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('forms')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'forms'
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center">
+                  <FileText className="mr-2" size={20} />
+                  Simple Forms ({pendingForms.length} pending)
+                </div>
+              </button>
+            </nav>
           </div>
+        </div>
+
+        {/* Service Requests Tab */}
+        {activeTab === 'service-requests' && (
+          <>
+            {/* Pending Service Requests */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <AlertCircle className="mr-2" size={24} style={{ color: 'var(--color-orange-500)' }} />
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Pending Service Requests ({pendingServiceRequests.length})
+                  </h2>
+                </div>
+              </div>
+              
+              {pendingServiceRequests.length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckCircle2 size={48} className="mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No pending service requests</h3>
+                  <p className="text-gray-600">All service requests have been processed</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Request ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Organization
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Service Type
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {pendingServiceRequests.map((request) => (
+                        <tr key={request.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {request.serviceRequestNo || request.id.slice(-8)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.organizationName || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.calibrationService}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                              {request.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => navigate(`/csc-service-request/${request.id}`)}
+                              className="text-indigo-600 hover:text-indigo-900 mr-4"
+                            >
+                              <Eye size={20} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Completed Service Requests */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <CheckCircle className="mr-2" size={24} style={{ color: 'var(--color-green-500)' }} />
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Completed Service Requests ({completedServiceRequests.length})
+                  </h2>
+                </div>
+              </div>
+              
+              {completedServiceRequests.length === 0 ? (
+                <div className="text-center py-12">
+                  <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No completed service requests</h3>
+                  <p className="text-gray-600">Completed requests will appear here</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Request ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Organization
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Completed Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {completedServiceRequests.map((request) => (
+                        <tr key={request.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {request.serviceRequestNo || request.id.slice(-8)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {request.organizationName}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {new Date(request.submissionTime).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => navigate(`/csc-service-request/${request.id}`)}
+                              className="text-indigo-600 hover:text-indigo-900 mr-4"
+                            >
+                              <Eye size={20} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Forms Tab */}
+        {activeTab === 'forms' && (
+          <>
+            {/* Pending Forms Table */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center">
+                  <AlertCircle className="mr-2" size={24} style={{ color: 'var(--color-orange-500)' }} />
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Pending Forms ({pendingForms.length})
+                  </h2>
+                </div>
+              </div>
           
           {pendingForms.length === 0 ? (
             <div className="text-center py-12">
@@ -418,6 +620,8 @@ export function CSCDashboard() {
             </div>
           )}
         </div>
+          </>
+        )}
       </div>
 
       {/* Modal */}

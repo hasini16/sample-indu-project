@@ -230,13 +230,20 @@ export function UserDashboard() {
               <TrendingUp className="w-8 h-8 text-blue-600" />
             </div>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <button
-              onClick={() => navigate('/create-form')}
+              onClick={() => navigate('/service-request')}
               className="flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Plus size={24} />
-              <span>Create New Request</span>
+              <span>New Service Request</span>
+            </button>
+            <button
+              onClick={() => navigate('/create-form')}
+              className="flex items-center space-x-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-8 py-4 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <FileText size={24} />
+              <span>Simple Form</span>
             </button>
             {stats.completed > 0 && (
               <button
@@ -276,13 +283,22 @@ export function UserDashboard() {
               <p className="text-gray-600 mb-8 max-w-md mx-auto">
                 Ready to get started? Create your first service request and we'll help you every step of the way.
               </p>
-              <button
-                onClick={() => navigate('/create-form')}
-                className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <Plus size={24} />
-                <span>Create Your First Request</span>
-              </button>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <button
+                  onClick={() => navigate('/service-request')}
+                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Plus size={24} />
+                  <span>Service Request Form</span>
+                </button>
+                <button
+                  onClick={() => navigate('/create-form')}
+                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-8 py-4 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <FileText size={24} />
+                  <span>Simple Form</span>
+                </button>
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">
