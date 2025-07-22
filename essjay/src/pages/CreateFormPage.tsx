@@ -33,7 +33,6 @@ export function CreateFormPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [currentStep, setCurrentStep] = useState(1);
 
   const serviceTypes = [
     'Technical Support',

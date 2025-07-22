@@ -11,7 +11,8 @@ export function LandingPage() {
       title: 'Users',
       description: 'Submit and track your service requests',
       icon: Users,
-      color: 'bg-blue-500 hover:bg-blue-600',
+      baseColor: '#3b82f6',
+      hoverColor: '#2563eb',
       route: '/login/user'
     },
     {
@@ -19,7 +20,8 @@ export function LandingPage() {
       title: 'CSC',
       description: 'Customer Service Center - Manage user requests',
       icon: Shield,
-      color: 'bg-green-500 hover:bg-green-600',
+      baseColor: '#22c55e',
+      hoverColor: '#16a34a',
       route: '/login/csc'
     },
     {
@@ -27,7 +29,8 @@ export function LandingPage() {
       title: 'Lab Technician',
       description: 'Technical support and laboratory services',
       icon: Wrench,
-      color: 'bg-purple-500 hover:bg-purple-600',
+      baseColor: '#8b5cf6',
+      hoverColor: '#7c3aed',
       route: '/login/technician'
     }
   ];
@@ -67,9 +70,21 @@ export function LandingPage() {
             return (
               <div
                 key={option.type}
-                className="bg-white rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow"
+                className="bg-white rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow card-hover"
               >
-                <div className={`w-16 h-16 ${option.color} rounded-full flex items-center justify-center mx-auto mb-6 transition-colors`}>
+                <div 
+                  className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 transition-colors"
+                  style={{ 
+                    backgroundColor: option.baseColor,
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = option.hoverColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = option.baseColor;
+                  }}
+                >
                   <IconComponent size={32} className="text-white" />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -80,7 +95,18 @@ export function LandingPage() {
                 </p>
                 <button
                   onClick={() => navigate(option.route)}
-                  className={`w-full ${option.color} text-white py-3 px-6 rounded-lg font-semibold transition-colors`}
+                  className="w-full text-white py-3 px-6 rounded-lg font-semibold transition-colors btn-hover-lift"
+                  style={{ 
+                    backgroundColor: option.baseColor,
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = option.hoverColor;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = option.baseColor;
+                  }}
                 >
                   Login as {option.title}
                 </button>

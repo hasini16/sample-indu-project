@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Navbar } from '../components/Navbar';
 import type { FormData } from '../types';
 import { db } from '../services/database';
-import { Eye, Edit, Send, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Eye, Edit, CheckCircle, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export function CSCDashboard() {
   const { user, userType } = useAuth();
@@ -14,6 +14,7 @@ export function CSCDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedForm, setSelectedForm] = useState<FormData | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (userType !== 'csc' || !user) {
@@ -54,12 +55,20 @@ export function CSCDashboard() {
     navigate(`/edit-form/${form.id}`);
   };
 
-  const handleSubmitForm = async (formId: string) => {
+  const handleCompleteForm = async (formId: string) => {
+    setProcessingId(formId);
     try {
-      await db.updateForm(formId, { status: 'submitted' });
+      await db.updateForm(formId, { 
+        status: 'completed',
+        comments: 'Form completed by CSC'
+      });
       loadForms(); // Refresh the forms
+      alert('Form has been successfully completed!');
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Error completing form:', error);
+      alert('Error completing form. Please try again.');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -81,8 +90,8 @@ export function CSCDashboard() {
   };
 
   const FormModal = ({ form, onClose }: { form: FormData; onClose: () => void }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-90vh overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900">Form Details</h2>
@@ -114,7 +123,7 @@ export function CSCDashboard() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Status</label>
-                <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}>
+                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}>
                   {form.status}
                 </span>
               </div>
@@ -167,7 +176,7 @@ export function CSCDashboard() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Urgency</label>
-                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                     form.serviceDetails.urgency === 'high' ? 'bg-red-100 text-red-800' :
                     form.serviceDetails.urgency === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-green-100 text-green-800'
@@ -221,7 +230,7 @@ export function CSCDashboard() {
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border border-green-500 rounded-full animate-spin" style={{ borderTopColor: 'transparent', borderWidth: '4px' }}></div>
         </div>
       </div>
     );
@@ -246,7 +255,7 @@ export function CSCDashboard() {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center">
-              <AlertCircle className="mr-2 text-orange-500" size={24} />
+              <AlertCircle className="mr-2" size={24} style={{ color: 'var(--color-orange-500)' }} />
               <h2 className="text-xl font-semibold text-gray-900">
                 Pending Forms ({pendingForms.length})
               </h2>
@@ -264,19 +273,19 @@ export function CSCDashboard() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Form ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Submitter
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Service Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Actions
                     </th>
                   </tr>
@@ -294,7 +303,7 @@ export function CSCDashboard() {
                         {form.serviceDetails.serviceType}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}>
+                        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(form.status)}`}>
                           {form.status}
                         </span>
                       </td>
@@ -315,11 +324,16 @@ export function CSCDashboard() {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleSubmitForm(form.id)}
+                            onClick={() => handleCompleteForm(form.id)}
+                            disabled={processingId === form.id}
                             className="inline-flex items-center px-3 py-1 border border-green-300 rounded-md text-sm text-green-700 hover:bg-green-50 transition-colors"
+                            style={{ 
+                              opacity: processingId === form.id ? 0.6 : 1,
+                              cursor: processingId === form.id ? 'not-allowed' : 'pointer'
+                            }}
                           >
-                            <Send size={16} className="mr-1" />
-                            Submit
+                            <CheckCircle size={16} className="mr-1" />
+                            {processingId === form.id ? 'Processing...' : 'Complete'}
                           </button>
                         </div>
                       </td>
@@ -335,7 +349,7 @@ export function CSCDashboard() {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center">
-              <CheckCircle2 className="mr-2 text-green-500" size={24} />
+              <CheckCircle2 className="mr-2" size={24} style={{ color: 'var(--color-green-500)' }} />
               <h2 className="text-xl font-semibold text-gray-900">
                 Completed Forms ({completedForms.length})
               </h2>
@@ -353,19 +367,19 @@ export function CSCDashboard() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Form ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Submitter
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Service Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Completion Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                       Actions
                     </th>
                   </tr>
