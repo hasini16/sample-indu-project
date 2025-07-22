@@ -1,35 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { LandingPage } from './pages/LandingPage';
+import { LoginPage } from './pages/LoginPage';
+import { SignupPage } from './pages/SignupPage';
+import { UserDashboard } from './pages/UserDashboard';
+import { CreateFormPage } from './pages/CreateFormPage';
+import { CSCDashboard } from './pages/CSCDashboard';
+import { EditFormPage } from './pages/EditFormPage';
+import { TechnicianDashboard } from './pages/TechnicianDashboard';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login/:type" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            
+            {/* User Routes */}
+            <Route path="/user-dashboard" element={<UserDashboard />} />
+            <Route path="/create-form" element={<CreateFormPage />} />
+            
+            {/* CSC Routes */}
+            <Route path="/csc-dashboard" element={<CSCDashboard />} />
+            <Route path="/edit-form/:formId" element={<EditFormPage />} />
+            
+            {/* Technician Routes */}
+            <Route path="/technician-dashboard" element={<TechnicianDashboard />} />
+            
+            {/* Catch all route - redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
